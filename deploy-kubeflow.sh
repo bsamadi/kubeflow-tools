@@ -4,6 +4,9 @@ export ZONE=us-central1-c
 export KFAPP=dashboard
 export KUBEFLOW_REPO=kubeflow_repo
 export KUBEFLOW_REPO="`pwd`/${KUBEFLOW_REPO}"
+export POOL_NAME=gpu-pool
+export GPU_TYPE=nvidia-tesla-k80
+export GPU_COUNT=1
 
 if [[ ! -d "${KUBEFLOW_REPO}" ]]; then
    mkdir ${KUBEFLOW_REPO}
@@ -22,3 +25,8 @@ ${KUBEFLOW_REPO}/scripts/kfctl.sh generate k8s
 ${KUBEFLOW_REPO}/scripts/kfctl.sh apply k8s
 
 kubectl -n kubeflow get  all
+
+gcloud container node-pools create ${POOL_NAME} \
+--accelerator type=${GPU_TYPE},count=${GPU_COUNT} --zone ${ZONE} \
+--cluster ${KFAPP} --num-nodes 1 --min-nodes 0 --max-nodes 4 \
+--enable-autoscaling
